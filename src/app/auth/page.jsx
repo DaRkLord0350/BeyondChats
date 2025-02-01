@@ -1,26 +1,24 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
-import { useRouter } from 'next/navigation';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Google from '../components/GoogleButton';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from '../components/ForgotPassword';
-
-
-
+import Google from '../components/GoogleButton';
+import { SitemarkIcon } from '../components/CustomIcons';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -30,9 +28,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: 'auto',
-  [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
-  },
+  [theme.breakpoints.up('sm')]: { maxWidth: '450px' },
   boxShadow:
     'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
   ...theme.applyStyles('dark', {
@@ -42,30 +38,15 @@ const Card = styled(MuiCard)(({ theme }) => ({
 }));
 
 const SignInContainer = styled(Stack)(({ theme }) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
+  height: '100vh',
   padding: theme.spacing(2),
-  [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(4),
-  },
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
-    backgroundImage:
-      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-    backgroundRepeat: 'no-repeat',
-    ...theme.applyStyles('dark', {
-      backgroundImage:
-        'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-    }),
-  },
+  [theme.breakpoints.up('sm')]: { padding: theme.spacing(4) },
 }));
 
 export default function SignIn() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordError, setPasswordError] = useState(false);
@@ -74,44 +55,13 @@ export default function SignIn() {
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
-    const handleSubmit = async (event) => {
-      event.preventDefault();
-      router.push('/home'); 
-      // if (!validateInputs()) return; // Prevent login if validation fails
-    
-      // try {
-      //   const response = await fetch('/api/auth/login', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({ email, password }),
-      //   });
-    
-      //   const data = await response.json();
-    
-      //   if (response.ok) {
-      //     console.log('Login successful:', data);
-      //     router.push('/home'); // Redirect after successful login
-      //   } else {
-      //     setPasswordError(true);
-      //     setPasswordErrorMessage(data.message || 'Invalid email or password.');
-      //   }
-      // } catch (error) {
-      //   console.error('Login error:', error);
-      //   setPasswordError(true);
-      //   setPasswordErrorMessage('Something went wrong. Please try again.');
-      // }
-    };
-    
+  const gg = () =>{
+    router.push('/home')
+  }
   const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
       isValid = false;
@@ -120,7 +70,7 @@ export default function SignIn() {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password || password.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
@@ -128,31 +78,78 @@ export default function SignIn() {
       setPasswordError(false);
       setPasswordErrorMessage('');
     }
-    router.push('/home');
+
     return isValid;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!validateInputs()) return;
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('token', result.token);
+        router.push('/home');
+      } else {
+        setPasswordError(true);
+        setPasswordErrorMessage(result.message || 'Invalid email or password.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setPasswordError(true);
+      setPasswordErrorMessage('Something went wrong. Try again.');
+    }
   };
 
   return (
     <>
       <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
-        {/* <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} /> */}
+      <SignInContainer direction="column" justifyContent="center" alignItems="center">
         <Card variant="outlined">
-          <Typography component="h1" variant="h4" sx={{ fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}>
+          <SitemarkIcon />
+          <Typography component="h1" variant="h4">
             Sign in
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
-              <TextField error={emailError} helperText={emailErrorMessage} id="email" type="email" name="email" required fullWidth />
+              <TextField
+                error={emailError}
+                helperText={emailErrorMessage}
+                id="email"
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                fullWidth
+              />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField error={passwordError} helperText={passwordErrorMessage} id="password" type="password" name="password" required fullWidth />
+              <TextField
+                error={passwordError}
+                helperText={passwordErrorMessage}
+                id="password"
+                type="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                fullWidth
+              />
             </FormControl>
             <FormControlLabel control={<Checkbox color="primary" />} label="Remember me" />
-            {/* <ForgotPassword open={open} handleClose={handleClose} /> */}
-            <Button type="submit" fullWidth variant="contained" onClick={handleSubmit}>
+            <ForgotPassword open={open} handleClose={handleClose} />
+            <Button type="submit" fullWidth variant="contained" onClick={gg}>
               Sign in
             </Button>
             <Link component="button" onClick={handleClickOpen} variant="body2" sx={{ alignSelf: 'center' }}>
@@ -160,8 +157,10 @@ export default function SignIn() {
             </Link>
           </Box>
           <Divider>or</Divider>
-          <Google/>
-          <Typography sx={{ textAlign: 'center' }}>Don't have an account? <Link href="/signup" variant="body2">Sign up</Link></Typography>
+          <Google />
+          <Typography sx={{ textAlign: 'center' }}>
+            Don't have an account? <Link href="/signup" variant="body2">Sign up</Link>
+          </Typography>
         </Card>
       </SignInContainer>
     </>

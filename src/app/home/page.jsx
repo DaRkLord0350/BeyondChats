@@ -4,6 +4,7 @@
 import { useRouter } from "next/navigation";
 import { Sparkles, Bot, BarChart3 } from 'lucide-react';
 import { useAuth } from "../hooks/useAuth"; // Custom hook for authentication
+import { Header } from "../components/Header";
 
 export default function HomePage() {
   const { user } = useAuth(); // Get user from useAuth hook
@@ -38,6 +39,7 @@ export default function HomePage() {
 
   return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Header/>
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">

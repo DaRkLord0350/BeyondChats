@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { useAuth } from "../hooks/useAuth";
 
+import { useRouter } from "next/navigation";
+
 export const Header = () => {
   const { user, logout } = useAuth();
+  const gg = () =>{
+    router.push("/auth");
+  }
+  
+  const router = useRouter(); // Initialize useRouter hook
 
   return (
     <header className="bg-blue-600 text-white p-4">
@@ -12,7 +19,7 @@ export const Header = () => {
         </Link>
         <nav>
           {user ? (
-            <button onClick={logout} className="bg-red-500 p-2 rounded-lg">
+            <button onClick={gg} className="bg-red-500 p-2 rounded-lg">
               Logout
             </button>
           ) : (
